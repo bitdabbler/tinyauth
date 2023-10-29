@@ -4,30 +4,40 @@
 
 `tinyauth` is intended to provide a simple, **minimalist**, token-based authentication.
 
-WIth token-based authentication, there is a fundamental tradeoff we have to make. If we have high trust, then we can reduce the load on the database by authenticating the user with just the state in the cryptographically secure session token. But, the longer the trust window is, the longer a session will remain valid even after we "inactivate" a user in our database. If we have zero trust, then we can check the DB to see if the user is still valid on every single request (effectively equivalent to simply storing sessions in the DB).
+With token-based authentication, there is a fundamental tradeoff between how much we trust our users and how much load we put on our datastore. If we have high trust, we can reduce the load on our datastore by authenticating the user with state stored in a cryptographically secure session token. But, the longer the trust window is, the longer a session will remain valid even after we "inactivate" a user in our database. At the extreme where we have zero trust, we can check the datastore to re-verify the user on every request, making it similar to simply storing sessions in the datastore, in terms of how many times we call the datastore.
 
-`tinyauth` allows you to manage this trade off using 3 levers. `MaxTrustsSecs` determines the longest amount of time (in seconds) between database checks. `MaxStaleSecs` determines the longest period that a token can remain valid without it being actively used. Finally, `MaxTokenSecs` determines the longest possible time a session can remain active before a user must login again. If you use `tinyauth` middleware, it handles all of the token maintenance.
+`tinyauth` allows you to manage this trade off using 3 levers:
 
-Note, `MaxTrustSecs` can be kept quite short (the default is 10 minutes), without annoying users too much. As long as the token is not stale and the session is not too old, the token will refresh itself transparently after checking the database, without bothering the user.
+- `MaxTrustsSecs` - the longest period between database checks
+- `MaxStaleSecs` - the longest period a token can remain valid without being actively used
+- `MaxTokenSecs` - the longest period a session can remain valid regardless of activity
 
-The middleware (and stock login/logout handlers) follow the standard library APIs for request handling, so they will work directly with the standard library, as well as compatible frameworks like Chi and Goji. It should generally be straightforward if you want to use the `Guard` as your auth state coordinator and write different middleware for other routing frameworks.
+`MaxTrustSecs` can be kept short, for high security without noticeably affecting users. The default is 10 minutes. At the end of `MaxTrustSecs`, `tinyauth` will check the datastore to ensure the user is still valid, then refresh the token transparently, all without bothering the user. That transparent refresh happens as long as (a) the user has been active within the last `MaxStaleSecs`, and (b) the last time the user logged in was within the last `MaxTokenSecs`.
 
-Finally, `tinyauth` doesn't use JWTs, or in this case, JWEs, because we want to expose only the APIs required for our narrow design goals (secure, and minimalist). We avoid the risk of using unsafe algorithms, and we throw out unnecessary default fields in JWT (and Paseto). `tinyauth` really is intentionally minimalist. We understand that there are many unsupported use cases, like those that require tokens that client can see (but not modify) because they are signed, but not encrypted. 
+If you use `tinyauth` middleware, it handles all of the token maintenance. The middleware, as well as the stock login and logout handlers, follow the standard library APIs for request handling. They will work directly with the standard library and all frameworks with compatible APIs, like Chi and Goji. 
 
+If you want to write different middleware for other routing frameworks, it should be straightforward to integrate `tiny.Guard` as the auth state coordinator.
 
 ## Usage
 
-To create a guard, which will work as the auth state manager for your middleware, you'll need 3 things:
+To create a `tinyauth.Guard`, which will work as the auth state coordinator for your middleware, we need 3 things:
 
-1. a pointer to any custom "user" type (e.g. `*Employee`), which only needs to implement the one function in the `Authable` interface:
+1. a pointer to any custom user type (e.g. `*Employee`), which only needs to implement the single method `Authable` interface:
     - `GetID()` - returns the user's unique identifier
-2. a `*tinycrypto.Keyset`, to manage encryption transparently
-3. a `tinyauth.Repo`, which is used for state persistence; it includes
+2. a `*tinycrypto.Keyset`, to manage encryption transparently, including key rotation
+3. a `tinyauth.Repo` implemention, used for state persistence:
     - `GetAuthable()` - fetch a user by ID
     - `BlacklistSession()` - register a sessionID in the blacklist table, to prevent auto-refreshing a dead session after logout
     - `CheckSessionBlacklist()` - check if a sessionID is in the blacklist
+
+To create a `tinyauth.Guard`:
 
 ```go
 guard := tinyauth.Guard(app.authKeyset, app.db, new(Employee))
 router.Use(guard.Middleware)
 ```
+
+## Limitations / Design Decisions
+
+`tinyauth` does not use JWTs, or in this case, JWEs. We expose only the APIs required for our narrow design goals, keeping things secure but minimalist. We avoid the risk of using unsafe algorithms, and the overhead of unneeded default fields in JWT (and Paseto). There are many unsupported use cases, like those that need tokens the client can inspect but not modify (i.e. signed, but not encrypted). 
+
