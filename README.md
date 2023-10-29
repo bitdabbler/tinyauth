@@ -1,5 +1,12 @@
 # tinyauth (Tiny Token Auth)
 
+```go
+import (
+    // ...
+    "github.com/bitdabbler/tinyauth"
+)
+```
+
 ## Overview
 
 `tinyauth` is intended to provide a simple, **minimalist**, token-based authentication.
