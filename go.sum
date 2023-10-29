@@ -1,0 +1,8 @@
+github.com/bitdabbler/acrypt v0.0.0-20231029000901-d2f6854732c5 h1:MiPl9KJ2Iw/gMcprTr7edKd4wXnmKglBcyGQWwlcnzY=
+github.com/bitdabbler/acrypt v0.0.0-20231029000901-d2f6854732c5/go.mod h1:jsYoO4fYSyG2FYd8R9hnWq9E93vtqJxIafBGP8n2IAc=
+github.com/bitdabbler/tinycrypto v0.0.0-20231029000234-ec21f3cba4a2 h1:FDtRm6FI3vDSahKjc4vuhRHqNL0e6GN+iFtiP6GWbgs=
+github.com/bitdabbler/tinycrypto v0.0.0-20231029000234-ec21f3cba4a2/go.mod h1:w7x87B8x7Rz72Fyg2cXYVPCCOJ60Fca7zw5QtROzqEg=
+golang.org/x/crypto v0.14.0 h1:wBqGXzWJW6m1XrIKlAH0Hs1JJ7+9KBwnIO8v66Q9cHc=
+golang.org/x/crypto v0.14.0/go.mod h1:MVFd36DqK4CsrnJYDkBA3VC4m2GkXAM0PvzMCn4JQf4=
+golang.org/x/sys v0.13.0 h1:Af8nKPmuFypiUBjVoU9V20FiaFXOcuZI21p0ycVYYGE=
+golang.org/x/sys v0.13.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
