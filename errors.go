@@ -19,8 +19,8 @@ const (
 
 // Error is an augmenting wrapper error type.
 type Error struct {
-	Msg string
 	Err error
+	Msg string
 	ErrType
 }
 

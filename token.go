@@ -41,11 +41,11 @@ var defaultTokenConfig = TokenConfig{
 
 // token holds token session details.
 type token struct {
-	IssuedAt   int64 `json:"issued_at"`
-	VerifiedAt int64 `json:"verified_at"`
-	TouchedAt  int64 `json:"touched_at"`
 	user       Authable
 	UserBytes  json.RawMessage `json:"user_bytes"`
+	IssuedAt   int64           `json:"issued_at"`
+	VerifiedAt int64           `json:"verified_at"`
+	TouchedAt  int64           `json:"touched_at"`
 }
 
 func newToken(a Authable) *token {
@@ -62,10 +62,10 @@ func newToken(a Authable) *token {
 // Guard holds the state used for authentication. Auth middleware are therefore
 // defined as methods on the Guard.
 type Guard struct {
-	cfg           TokenConfig
 	userPrototype Authable
 	db            Repo
 	keyset        *tinycrypto.Keyset
+	cfg           TokenConfig
 }
 
 // NewGuard creates an authenticator using the default configuration.
